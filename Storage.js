@@ -47,6 +47,6 @@ function Storage() {
 
 /// init
 
-    this.clear()
+    //this.clear()
     
 }

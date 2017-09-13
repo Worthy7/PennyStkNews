@@ -176,14 +176,13 @@ function updateFeed(){
 			//set the new date
 			//stg.set("feeddate", new_feed_date) //we will skip this for now to test
 			//get the current feed items
-			current_items = stg.getPosts() //dict array
 			stream_items = parseStream(data)
 			//limit size
 			stream_items = stream_items.slice(0, 3)
 			//compare and get the new items
 			for (i = 0; i < stream_items.length; i++){
 				item = stream_items[i]
-				if (!(parseId(item) in current_items)){
+				if (stg.GetPost(parseId(item)) != null){
 					//pub date 
 					pub_date = parsePubDate(item)
 					ticker  = parseTicker(item)

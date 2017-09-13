@@ -1,14 +1,38 @@
 <!DOCTYPE html>
+
+
+
+
 <html>
 <body>
-<div id="results">
+<div ng-app="myShoppingList" ng-controller="postsController">
+    <ul>
+        <li ng-repeat="post in posts">{{post.gid}}</li>
+    </ul>
 </div>
 </body>
 </html>
 
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
 <script type="text/javascript" src="moment-with-locales.min.js"></script>
 <script type="text/javascript" src="moment-timezone-with-data.min.js"></script>
 <script type="text/javascript" src="storage.js"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script type="text/javascript" src="site.js"></script>
 
+
+<script>
+	var app = angular.module("myShoppingList", []); 
+	app.controller("postsController", function($scope) {
+		posts = stg.getPosts()
+		postsvms = []
+		for (var i = 0; i < posts.length; i++){
+				post = posts[i]
+
+				postsvms.push({
+						gid : parseId(post)
+				})
+		}
+	    $scope.posts = postsvms
+	});
+</script>
