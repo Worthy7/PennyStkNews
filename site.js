@@ -113,11 +113,11 @@ function getTimedStockPrice(entry, ticker, date, callbackinput){
 	        	callbackinput(entry, ticker, date, price);
         	} catch (err) {
         		//google didn't manage to give us the price.
-        		alert(err)
+        		//alert(err)
         	}
         },
         error: function(jqXHR, textStatus, errorThrow){
-        	alert(jqXHR)
+        	//alert(jqXHR)
         }
     })
 
@@ -181,7 +181,7 @@ function updateFeed(callback){
 			//get the current feed items
 			stream_items = parseStream(data)
 			//limit size
-			stream_items = stream_items.slice(0, 3)
+			stream_items = stream_items.slice(0, 10)
 			//compare and get the new items
 			for (i = 0; i < stream_items.length; i++){
 				item = stream_items[i]

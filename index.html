@@ -39,8 +39,10 @@
 
 
 		    	if (stg.get("feeddate") == $scope.lastDate) {
+	    			console.log("date same, returning")
 		    		return;
 		    	}
+    			console.log("date different loading data")
 
 		    	$scope.lastDate = stg.get("feeddate")
 		    	this.posts = stg.getPosts().slice(0,20)
@@ -62,7 +64,7 @@
 		    
 	    }
 	    $scope.updateData();
-	    $interval($scope.updateData, 60*1000)
+	    $interval($scope.updateData, 10*1000)
 	}]);
 
 
