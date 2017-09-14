@@ -16,6 +16,7 @@ function Storage() {
                 arra.push(this.GetPost(key.substr(5)))
             }
         }
+        arra = arra.sort(function(a, b) { return parsePubDate(a) < parsePubDate(b)})
         return arra
     };
 

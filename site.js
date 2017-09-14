@@ -89,6 +89,9 @@ function parseCsv(data){
 
 }
 
+function getNicePubDate(data){
+	return (new moment(parsePubDate(data)).tz('America/New_York').format("YYYY-MM-DD HH:mm:ss"))
+}
 
 function getTimedStockPrice(entry, ticker, date, callbackinput){
 	//date must be YYYY-MM-DD
@@ -168,13 +171,13 @@ function addPrice(entry, price){
 	return entry;
 }
 
-function updateFeed(){
+function updateFeed(callback){
 	getFeed(function(data){
 		current_feed_date = stg.get("feeddate")
 		new_feed_date = parseFeedDate(data)
 		if (current_feed_date == null || current_feed_date < new_feed_date) {
 			//set the new date
-			//stg.set("feeddate", new_feed_date) //we will skip this for now to test
+			stg.set("feeddate", new_feed_date) //we will skip this for now to test
 			//get the current feed items
 			stream_items = parseStream(data)
 			//limit size
@@ -192,18 +195,17 @@ function updateFeed(){
 							//store the price and post together
 							newentry = addPrice(entry, price)
 							stg.storePost(parseId(entry), newentry)
-
 					})
 
 				}
 			}
-
+			
 		}
-
+		callback();
 	})
 }
 //run regularly
 //timeout...
 var ONE_MINUTE = 60 * 1000;
 //setInterval(main, ONE_MINUTE);
-updateFeed()
+//updateFeed()
