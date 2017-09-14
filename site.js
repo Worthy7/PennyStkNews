@@ -173,7 +173,7 @@ function addPrice(entry, price){
 
 function updateFeed(callback){
 	getFeed(function(data){
-		current_feed_date = stg.get("feeddate")
+		current_feed_date = new Date(stg.get("feeddate"))
 		new_feed_date = parseFeedDate(data)
 		if (current_feed_date == null || current_feed_date < new_feed_date) {
 			//set the new date
