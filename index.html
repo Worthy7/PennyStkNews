@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 
 
-
-
 <html>
-<body>
-<div ng-app="myShoppingList" ng-controller="postsController">
-    <ul>
-        <li ng-repeat="post in posts">{{post.gid}}</li>
-    </ul>
-
-<span id="tradingview-copyright"><a ref="nofollow noopener" target="_blank" href="http://www.tradingview.com" style="color: rgb(173, 174, 176); font-family: &quot;Trebuchet MS&quot;, Tahoma, Arial, sans-serif; font-size: 13px;">Market Quotes by <span style="color: #3BB3E4">TradingView</span></a></span>
-
-</div>
-</body>
+	<body>
+		<div ng-app="myShoppingList" ng-controller="postsController">
+			<ul>
+			        <li ng-repeat="post in posts">
+				        {{post.gid}} <br> 
+				        {{post.pubDate}} <br> 
+				        {{post.title}} <br> 
+				        {{post.price}} <br> 
+			        	<div tvgraph="{{post.ticker}}" id="tv-medium-widget-{{post.ticker}}"></div>
+			        </li>
+			</ul>
+		</div>
+	</body>
 </html>
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
@@ -22,77 +23,64 @@
 <script type="text/javascript" src="storage.js"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script type="text/javascript" src="site.js"></script>
-
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
 	var app = angular.module("myShoppingList", []); 
 	app.controller("postsController", function($scope) {
-		posts = stg.getPosts()
+		this.posts = stg.getPosts().slice(0,2)
 		postsvms = []
-		for (var i = 0; i < posts.length; i++){
-				post = posts[i]
+		for (var i = 0; i < this.posts.length; i++){
+				post = this.posts[i]
 
 				postsvms.push({
-						gid : parseId(post)
+						gid : parseId(post),
+						pubDate : parsePubDate(post),
+						title : parseTag(post, "title"),
+						price : parseTag(post, "price"),
+						ticker : parseTicker(post)
 				})
 		}
+
 	    $scope.posts = postsvms
+
 	});
-</script>
 
-<!-- TradingView Widget BEGIN -->
 
-<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js">
-{
-  "showChart": true,
-  "locale": "en",
-  "width": "100%",
-  "height": "100%",
-  "plotLineColorGrowing": "rgba(60, 188, 152, 1)",
-  "plotLineColorFalling": "rgba(255, 74, 104, 1)",
-  "gridLineColor": "rgba(233, 233, 234, 1)",
-  "scaleFontColor": "rgba(218, 221, 224, 1)",
-  "belowLineFillColorGrowing": "rgba(60, 188, 152, 0.05)",
-  "belowLineFillColorFalling": "rgba(255, 74, 104, 0.05)",
-  "symbolActiveColor": "rgba(242, 250, 254, 1)",
-  "tabs": [
-    {
-      "title": "Equities",
-      "symbols": [
-        {
-          "s": "NASDAQ:AAPL",
-          "d": "Apple"
-        },
-        {
-          "s": "NASDAQ:GOOG",
-          "d": "Google"
+// Directive
+  app.directive('tvgraph', function () {
+    return {
+      	link: function ($scope, element, attrs, ctrl) {
+        	var watch = $scope.$watch(function() {
+                return element.children().length;
+            }, function() {
+	                // Wait for templates to render
+	                $scope.$evalAsync(function() {
+	                    // Finally, directives are evaluated
+	                    // and templates are renderer here
+	                    var children = element.children();
+                    	console.log(children);
+
+			        	new TradingView.MediumWidget({
+							  "container_id": "tv-medium-widget-"+ attrs.tvgraph,
+							  "symbols": [
+							    attrs.tvgraph+"|1d"
+							  ],
+							  "gridLineColor": "#e9e9ea",
+							  "fontColor": "#83888D",
+							  "underLineColor": "#dbeffb",
+							  "trendLineColor": "#4bafe9",
+							  "width": "500px",
+							  "height": "300px",
+							  "locale": "en",
+							  "chartOnly": false
+						});
+        			})
+            	}
+            )
         }
-      ]
     }
-  ]
-}
-
+  });
 
 </script>
-<!-- TradingView Widget END -->
 
-
-<!-- TradingView Widget BEGIN -->
-<span id="tradingview-copyright"><a ref="nofollow noopener" target="_blank" href="http://www.tradingview.com" style="color: rgb(173, 174, 176); font-family: &quot;Trebuchet MS&quot;, Tahoma, Arial, sans-serif; font-size: 13px;">Market Movers by <span style="color: #3BB3E4">TradingView</span></a></span>
-<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-hotlists.js">
-{
-  "exchange": "OTC",
-  "showChart": true,
-  "locale": "en",
-  "width": "400",
-  "height": "600",
-  "plotLineColorGrowing": "rgba(60, 188, 152, 1)",
-  "plotLineColorFalling": "rgba(255, 74, 104, 1)",
-  "gridLineColor": "rgba(242, 242, 242, 1)",
-  "scaleFontColor": "rgba(218, 221, 224, 1)",
-  "belowLineFillColorGrowing": "rgba(60, 188, 152, 0.05)",
-  "belowLineFillColorFalling": "rgba(255, 74, 104, 0.05)",
-  "symbolActiveColor": "rgba(242, 250, 254, 1)"
-}
-</script>
-<!-- TradingView Widget END -->
