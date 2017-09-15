@@ -28,16 +28,58 @@
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
-	var app = angular.module("myShoppingList", []); 
+    var app = angular.module("myShoppingList", []); 
+
+
+    // Directive
+    app.directive('tvgraph', function () {
+        return {
+            link: function ($scope, element, attrs, ctrl) {
+                var watch = $scope.$watch(function () {
+                    return element.children().length;
+                }, function () {
+                    // Wait for templates to render
+                    $scope.$evalAsync(function () {
+                        // Finally, directives are evaluated
+                        // and templates are renderer here
+                        var children = element.children();
+                        console.log(children);
+                        new TradingView.widget({
+                            "container_id": "tv-medium-widget-" + attrs.tvgraph,
+                            "width": 500,
+                            "height": 300,
+                            "symbol": attrs.tvgraph,
+                            "interval": "1",
+                            "timezone": "exchange",
+                            "theme": "Light",
+                            "style": "3",
+                            "locale": "en",
+                            "toolbar_bg": "#f1f3f6",
+                            "enable_publishing": false,
+                            "hide_top_toolbar": true,
+                            "save_image": false,
+                            "hideideas": true
+                        })
+
+                    })
+                }
+                )
+            }
+        }
+    });
+
+
 	app.controller("postsController", ['$scope', '$interval', 
 		function($scope, $interval) {
+            
 
-	    $scope.updateData = function(){
+        $scope.updateData = function () {
 	    	console.log("checkingfeed")
 	    	updateFeed(function(){
 
 
 
+                console.log(stg.get("feeddate"))
 		    	if (stg.get("feeddate") == $scope.lastDate) {
 	    			console.log("date same, returning")
 		    		return;
@@ -45,65 +87,31 @@
     			console.log("date different loading data")
 
 		    	$scope.lastDate = stg.get("feeddate")
-		    	this.posts = stg.getPosts().slice(0,20)
+		    	this.posts = stg.getPosts().slice(0,10)
 				postsvms = []
 				for (var i = 0; i < this.posts.length; i++){
 						post = this.posts[i]
 
 						postsvms.push({
-								gid : parseId(post),
-								pubDate : getNicePubDate(post),
-								title : parseTag(post, "title"),
-								price : parseTag(post, "price"),
-								ticker : parseTicker(post)
+								gid : post.guid,
+                                pubDate: (new moment(post.pubdate).tz('America/New_York').format("YYYY-MM-DD HH:mm:ss")),
+								title : post.title,
+								price : post.price,
+								ticker : post.ticker
 						})
-				}
-				$scope.posts = postsvms	
+                }
+                console.log("Finished fetching from store... loading screen")
+                $scope.posts = postsvms	
+                $scope.$apply() 
 	    	})
 
 		    
 	    }
 	    $scope.updateData();
-	    $interval($scope.updateData, 10*1000)
+	    $interval($scope.updateData, 60*1000)
 	}]);
 
 
-// Directive
-  app.directive('tvgraph', function () {
-    return {
-      	link: function ($scope, element, attrs, ctrl) {
-        	var watch = $scope.$watch(function() {
-                return element.children().length;
-            }, function() {
-	                // Wait for templates to render
-	                $scope.$evalAsync(function() {
-	                    // Finally, directives are evaluated
-	                    // and templates are renderer here
-	                    var children = element.children();
-                    	console.log(children);
-						new TradingView.widget({
-						  "container_id": "tv-medium-widget-"+ attrs.tvgraph,
-						  "width": 500,
-						  "height": 300,
-						  "symbol": attrs.tvgraph,
-						  "interval": "1",
-						  "timezone": "exchange",
-						  "theme": "Light",
-						  "style": "3",
-						  "locale": "en",
-						  "toolbar_bg": "#f1f3f6",
-						  "enable_publishing": false,
-						  "hide_top_toolbar": true,
-						  "save_image": false,
-						  "hideideas": true
-						})
-									        
-        			})
-            	}
-            )
-        }
-    }
-  });
 
 
 

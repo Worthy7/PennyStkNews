@@ -11,33 +11,19 @@
 //occastionally update the price of "now" info for on screen elements.
 
 
+function Post (guid, title, pubdate, price, ticker) {
 
-stg = new Storage();
-function main(){
-	clearFeed()
-	entries = getFeed(function(feed){
-		entries = parseStream(feed)
-		shomax = 3
-		count = 0
-
-		$.each(entries, function(i, entry) {
-			//console.log(entry)
-			if (checkIfPink(entry) || count >= shomax) {
-
-			} else {
-				count = count + 1
-				ticker = parseTicker(entry)
-				getStockPrice(entry, ticker, function(entry, ticker, price) {
-					if (price < 5.0) {
-						displayEntry(entry, ticker, price);
-					}	
-				})
-			}
-		})
-		}
-	)
+    return {
+        guid : guid,
+        title : title,
+        pubdate: pubdate,
+        price : price,
+        ticker: ticker
+    }
 }
 
+
+stg = new Storage();
 
 function parseId(entry) {
 	val = entry.getElementsByTagName("guid")[0].childNodes[0].nodeValue
@@ -45,7 +31,7 @@ function parseId(entry) {
 }
 
 
-function parsePubDate(entry, tag) {
+function parsePubDate(entry) {
 	val = new Date(entry.getElementsByTagName("pubDate")[0].childNodes[0].nodeValue)
 	return val
 }
@@ -81,7 +67,12 @@ function getFeed(callback){
 };
 
 function parseStream(feed) {
-	return $(feed).find("item")
+    arr = []
+    $(feed).find("item").each(function (i, entry) {
+        if (!checkIfPink(entry)) // don't save pink stocks
+        arr.push(Post(parseId(entry), parseTag(entry, "title"), parsePubDate(entry), 0.0, parseTicker(entry)))
+            })
+    return arr
 }
 
 
@@ -101,32 +92,31 @@ function getTimedStockPrice(entry, ticker, date, callbackinput){
 	url = "https://www.google.com/finance/historical?q=OTCMKTS:"+ ticker+ "&startdate="+ fdate + "&enddate=" + fdate + "&output=csv"
 
 
-   $.ajax({
-        url: url,
-        type: 'get',
-        dataType: 'text',
-        success: function(data) {
-            //it usually comes here
-        	try{
-	        	date = data.split("\n")[1].split(",")[0]
-	        	price = data.split("\n")[1].split(",")[4]
-	        	callbackinput(entry, ticker, date, price);
-        	} catch (err) {
-        		//google didn't manage to give us the price.
-        		//alert(err)
-        	}
-        },
-        error: function(jqXHR, textStatus, errorThrow){
-        	//alert(jqXHR)
-        }
-    })
+    /////disabled for now due to cors issues
+
+    callbackinput(entry, ticker, date, 0.0);
+
+   //$.ajax({
+   //     url: url,
+   //     type: 'get',
+   //     dataType: 'text',
+   //     success: function(data) {
+   //         //it usually comes here
+   //     	try{
+	  //      	date = data.split("\n")[1].split(",")[0]
+	  //      	price = data.split("\n")[1].split(",")[4]
+	  //      	callbackinput(entry, ticker, date, price);
+   //     	} catch (err) {
+   //     		//google didn't manage to give us the price.
+   //     		//alert(err)
+   //     	}
+   //     },
+   //     error: function(jqXHR, textStatus, errorThrow){
+   //     	//alert(jqXHR)
+   //     }
+   // })
 
 }
-
-function testHistory(){
-	getTimedStockPrice(null, "AAPL", "05/05/2017", function(){})
-}
-//testHistory()
 
 function getStockPrice(entry, ticker, callbackinput){
 	// stolen from https://stackoverflow.com/questions/5150040/stock-quotes-with-javascript
@@ -177,35 +167,20 @@ function updateFeed(callback){
 		new_feed_date = parseFeedDate(data)
 		if (current_feed_date == null || current_feed_date < new_feed_date) {
 			//set the new date
-			stg.set("feeddate", new_feed_date) //we will skip this for now to test
 			//get the current feed items
 			stream_items = parseStream(data)
 			//limit size
-			stream_items = stream_items.slice(0, 10)
+			//stream_items = stream_items.slice(0, 10)
 			//compare and get the new items
 			for (i = 0; i < stream_items.length; i++){
-				item = stream_items[i]
-				if (stg.GetPost(parseId(item)) != null){
-					//pub date 
-					pub_date = parsePubDate(item)
-					ticker  = parseTicker(item)
-					//get and attach the price
-
-					getTimedStockPrice(item, ticker, pub_date, function(entry, ticker, date, price){
-							//store the price and post together
-							newentry = addPrice(entry, price)
-							stg.storePost(parseId(entry), newentry)
-					})
-
-				}
-			}
-			
-		}
+                stg.storePost(stream_items[i])
+            }
+            stg.set("feeddate", new_feed_date) //we will skip this for now to test
+        }
 		callback();
 	})
 }
 //run regularly
 //timeout...
 var ONE_MINUTE = 60 * 1000;
-//setInterval(main, ONE_MINUTE);
 //updateFeed()
