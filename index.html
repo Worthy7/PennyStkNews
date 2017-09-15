@@ -87,7 +87,7 @@
     			console.log("date different loading data")
 
 		    	$scope.lastDate = stg.get("feeddate")
-		    	this.posts = stg.getPosts().slice(0,10)
+		    	this.posts = stg.getPosts().slice(0,50)
 				postsvms = []
 				for (var i = 0; i < this.posts.length; i++){
 						post = this.posts[i]

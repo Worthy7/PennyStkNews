@@ -85,6 +85,18 @@ function getNicePubDate(data){
 }
 
 function getTimedStockPrice(entry, ticker, date, callbackinput){
+	///if we use google we want to do the following:
+	// first, try to get the latest price.
+	// if we get back two prices, one after an one before, perfect. we use the one before as the "price at point"
+	// (and we can save this forever, it's done.)
+	//if we only get back a price before this time, then we could show it, but it's not the set price, unconfirmed best.
+	// we could also save the "latest price/date" too, for the sake of comparisons etc.
+
+	/////http://www.networkerror.org/component/content/article/1-technical-wootness/44-googles-undocumented-finance-api.html
+
+	////https://finance.google.com/finance/getprices?q=IDWM&x=OTCMKTS&i=60p=10d&f=d,c,h,l,o,v&TS=1505448466
+	//ts needs to be now unix time.
+
 	//date must be YYYY-MM-DD
 	fdate = (new moment(date)).tz('America/New_York').format("YYYY-MM-DD")
 	//ticker = "AAPL"
